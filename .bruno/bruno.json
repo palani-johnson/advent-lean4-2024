@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "AOC-2024",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

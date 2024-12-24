@@ -1,0 +1,19 @@
+meta {
+  name: get-input
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://adventofcode.com/2024/day/{{day}}/input
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: session={{aoc_session}}
+}
+
+vars:pre-request {
+  day: 1
+}
