@@ -28,7 +28,7 @@ def main (args : List String) : IO Unit := do
   | [] => return
   | filePath :: rest =>
     let fileContent <- IO.FS.readFile filePath
-    let parseResult := inputParser.run fileContent
+    let parseResult := inputParser.run fileContent.trim
 
     match parseResult with
     | .error _ => IO.eprintln s!"Failed to parse {filePath}"

@@ -71,7 +71,7 @@ def main (args : List String) : IO Unit := do
   | [] => return
   | filePath :: rest =>
     let fileContent <- IO.FS.readFile filePath
-    let input := fileContent |> splitInput
+    let input := fileContent.trim |> splitInput
 
     String.intercalate "\n  " [
       s!"Solution for {filePath}:",
