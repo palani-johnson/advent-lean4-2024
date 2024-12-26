@@ -5,7 +5,7 @@ open Std.Internal.Parsec.String
 
 def Reports := List (List Int)
 
-def inputParser : Parser Reports := sepBy (sepBy (digits) (skipChar ' ')) (skipChar '\n')
+def inputParser : Parser Reports := sepBy (sepBy digits (skipChar ' ')) (skipChar '\n')
 
 inductive Run where
   | incresing
@@ -29,10 +29,15 @@ def isSafe (report : List Int) :=
 
   runs.all (· == Run.decresing) || runs.all (· == Run.incresing)
 
-def solve1 (reports : Reports) := (reports.map isSafe).count true
+def solve1 (reports : Reports) := reports.map isSafe |>.count true
 
 def solve2 (reports : Reports) :=
-  "Not Implemented"
+  let isSafe2 (report : List Int) :=
+    List.range report.length
+    |>.map (report.eraseIdx · |> isSafe)
+    |>.any (·)
+
+  (reports.map isSafe2).count true
 
 def main (args : List String) : IO Unit := do
   match args with
