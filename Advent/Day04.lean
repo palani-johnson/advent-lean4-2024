@@ -7,19 +7,6 @@ def ProblemInput := List <| List Char
 
 def splitInput (input : String) : ProblemInput := input.splitOn "\n" |>.map (·.data)
 
-def exampleInput := "....XXMAS.
-.SAMXMS...
-...S..A...
-..A.A.MS.X
-XMASAMX.MM
-X.....XA.A
-S.S.S.S.SS
-.A.A.A.A.A
-..M.M.M.MM
-.X.X.XMASX" |> splitInput
-
-
-
 def get2D (input : ProblemInput) (x y : Int) := do
   if x < 0 || y < 0 then
     Option.none
