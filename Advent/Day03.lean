@@ -16,16 +16,15 @@ def parseMul : Parser (Int × Int) := do
 
   return (a, b)
 
-partial def parseFirstMul : Parser (Int × Int) := attempt parseMul <|> skip *> parseFirstMul
+partial def parseFirstMul : Parser (Int × Int) := attempt parseMul <|> attempt (skip *> parseFirstMul)
 
 def parseInput : Parser ProblemInput := many parseFirstMul
 
-#eval parseInput.run " d m mul(11,2) mul(3,4)nfsdgkj\nmul(5,6)mul(8, 9)mmul(1,2)"
-#eval parseInput.run "mul(1,2)mul(1,2)mul(1,2)g"
+#eval parseInput.run " d m mul(11,2) mul(3,4)nfsdgkj\nmul(5,6)mul(8, 9)mmul(1,2)ggggg"
+#eval parseInput.run "mul(1,2)mul(1,2)mul(1,2)"
 
-def solve1 (problemInput : ProblemInput) := problemInput
+def solve1 (problemInput : ProblemInput) := problemInput.toList
   |>.map (λ (a, b) => a * b)
-  |>.toList
   |>.sum
 
 def solve2 (_ : ProblemInput) :=
