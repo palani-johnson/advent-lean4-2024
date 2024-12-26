@@ -14,14 +14,6 @@ def get2D (input : ProblemInput) (x y : Int) := do
     let row <- input.get? x.toNat
     row.get? y.toNat
 
-def findXMAS (input : ProblemInput) (x y dx dy : Int) :=
-  let offsets : List (Char × Int) := "XMAS".data.zip [0, 1, 2, 3]
-
-  offsets.map (λ (char, offset) =>
-    (get2D input (x + offset * dx) (y + offset * dy)) == (Option.some char)
-  )
-  |>.all (·)
-
 def solve1 (input : ProblemInput) :=
   let numRows := input.length
   let numCols := input.head! |>.length
@@ -33,10 +25,15 @@ def solve1 (input : ProblemInput) :=
     (1, -1), (-1, 1),
   ]
 
+  let xmasOffsets : List (Char × Int) := "XMAS".data.zip [0, 1, 2, 3]
+
   List.range numRows |>.map (λ x =>
     List.range numCols |>.map (λ y =>
       offsets.map (λ (dx, dy) =>
-        findXMAS input x y dx dy
+        xmasOffsets.map (λ (char, offset) =>
+          get2D input (x + offset * dx) (y + offset * dy) == Option.some char
+        )
+        |>.all (·)
       )
       |>.count true
     )
@@ -44,8 +41,30 @@ def solve1 (input : ProblemInput) :=
   )
   |>.sum
 
-def solve2 (_ : ProblemInput) :=
-  NotImplemented
+def solve2 (input : ProblemInput) :=
+  let numRows := input.length
+  let numCols := input.head! |>.length
+
+  let masOffsets := [
+    [('A', 0, 0), ('M', -1, -1), ('S', 1, 1), ('M', -1, 1), ('S', 1, -1)],
+    [('A', 0, 0), ('S', -1, -1), ('M', 1, 1), ('M', -1, 1), ('S', 1, -1)],
+    [('A', 0, 0), ('S', -1, -1), ('M', 1, 1), ('S', -1, 1), ('M', 1, -1)],
+    [('A', 0, 0), ('M', -1, -1), ('S', 1, 1), ('S', -1, 1), ('M', 1, -1)],
+  ]
+
+  List.range numRows |>.map (λ x =>
+    List.range numCols |>.map (λ y =>
+      masOffsets.map (λ masoffset =>
+        masoffset.map (λ (char, dx, dy) =>
+          get2D input (x + dx) (y + dy) == Option.some char
+        )
+        |>.all (·)
+      )
+      |>.any (·)
+    )
+    |>.count true
+  )
+  |>.sum
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -55,9 +74,9 @@ def main (args : List String) : IO Unit := do
     let input := fileContent |> splitInput
 
     String.intercalate "\n  " [
-        s!"Solution for {filePath}:",
-        s!"Part 1: {input |> solve1}",
-        s!"Part 2: {input |> solve2}"
+      s!"Solution for {filePath}:",
+      s!"Part 1: {input |> solve1}",
+      s!"Part 2: {input |> solve2}",
     ] |> IO.println
 
     main rest
