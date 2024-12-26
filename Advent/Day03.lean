@@ -4,19 +4,24 @@ import Advent.Utils
 open Std.Internal.Parsec.String
 open Std.Internal.Parsec
 
+inductive Instruction where
+  | iMul (a b : Int)
+  | iDo
+  | iDont
+deriving BEq, Repr
 
-def ProblemInput := Array (Int × Int)
+def ProblemInput := Array Instruction
 
-def parseMul : Parser (Int × Int) := do
+def parseMul : Parser Instruction := do
   let _ <- pstring "mul("
   let a <- digits
   let _ <- pchar ','
   let b <- digits
   let _ <- pchar ')'
 
-  return (a, b)
+  return .iMul a b
 
-partial def parseFirstMul : Parser (Int × Int) := attempt parseMul <|> attempt (skip *> parseFirstMul)
+partial def parseFirstMul : Parser Instruction := attempt parseMul <|> attempt (skip *> parseFirstMul)
 
 def parseInput : Parser ProblemInput := many parseFirstMul
 
@@ -24,7 +29,10 @@ def parseInput : Parser ProblemInput := many parseFirstMul
 #eval parseInput.run "mul(1,2)mul(1,2)mul(1,2)"
 
 def solve1 (problemInput : ProblemInput) := problemInput.toList
-  |>.map (λ (a, b) => a * b)
+  |>.map ( λ
+    | .iMul a b => a * b
+    | _ => 0
+  )
   |>.sum
 
 def solve2 (_ : ProblemInput) :=
