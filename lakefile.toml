@@ -13,3 +13,7 @@ root = "Advent.Day01"
 [[lean_exe]]
 name = "day02"
 root = "Advent.Day02"
+
+[[lean_exe]]
+name = "day03"
+root = "Advent.Day03"
