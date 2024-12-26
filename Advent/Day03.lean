@@ -21,12 +21,22 @@ def parseMul : Parser Instruction := do
 
   return .iMul a b
 
-partial def parseFirstMul : Parser Instruction := attempt parseMul <|> attempt (skip *> parseFirstMul)
+def parseDo : Parser Instruction := do
+  let _ <- pstring "do()"
+  return .iDo
+
+def parseDont : Parser Instruction := do
+  let _ <- pstring "don't()"
+  return .iDont
+
+partial def parseFirstMul : Parser Instruction := attempt parseMul
+  <|> attempt parseDo
+  <|> attempt parseDont
+  <|> attempt (skip *> parseFirstMul)
 
 def parseInput : Parser ProblemInput := many parseFirstMul
 
-#eval parseInput.run " d m mul(11,2) mul(3,4)nfsdgkj\nmul(5,6)mul(8, 9)mmul(1,2)ggggg"
-#eval parseInput.run "mul(1,2)mul(1,2)mul(1,2)"
+#eval parseInput.run "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"
 
 def solve1 (problemInput : ProblemInput) := problemInput.toList
   |>.map ( λ
@@ -35,8 +45,14 @@ def solve1 (problemInput : ProblemInput) := problemInput.toList
   )
   |>.sum
 
-def solve2 (_ : ProblemInput) :=
-  "Not Implemented"
+def solve2 (problemInput : ProblemInput) := problemInput.toList
+  |>.foldl (init := (Instruction.iDo, 0)) ( λ
+    | (_, acc), .iDo => (.iDo, acc)
+    | (_, acc), .iDont => (.iDont, acc)
+    | (.iDont, acc), _ => (.iDont, acc)
+    | (_, acc), .iMul a b => (.iDo, acc + a * b)
+  )
+  |>.2
 
 def main (args : List String) : IO Unit := do
   match args with
