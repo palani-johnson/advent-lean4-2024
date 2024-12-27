@@ -7,13 +7,6 @@ def ProblemInput := List <| List Char
 
 def splitInput (input : String) : ProblemInput := input.splitOn "\n" |>.map (·.data)
 
-def get2D (input : ProblemInput) (x y : Int) := do
-  if x < 0 || y < 0 then
-    Option.none
-  else
-    let row <- input.get? x.toNat
-    row.get? y.toNat
-
 def solve1 (input : ProblemInput) :=
   let numRows := input.length
   let numCols := input.head! |>.length
