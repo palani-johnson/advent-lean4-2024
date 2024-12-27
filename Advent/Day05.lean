@@ -34,14 +34,14 @@ def solve1 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
   |>.sum
 
 def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
-  let rec quickSort (pageNums : List Int) : List Int := match pageNums with
-    | [] => []
-    | head :: rest =>
-      let lesser := rest.filter (λ e => ordered orderingRules head e)
-      let greater := rest.filter (λ e => not <| ordered orderingRules head e)
+  let rec quickSort : List Int → List Int
+  | [] => []
+  | head :: rest =>
+    let lesser := rest.filter (ordered orderingRules head ·)
+    let greater := rest.filter (not <| ordered orderingRules head ·)
 
-      (quickSort lesser) ++ [head] ++ (quickSort greater)
-  termination_by pageNums.length
+    (quickSort lesser) ++ [head] ++ (quickSort greater)
+  termination_by l => l.length
   decreasing_by
     all_goals simp_wf
     . sorry
