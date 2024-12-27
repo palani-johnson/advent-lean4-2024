@@ -16,10 +16,23 @@ def rulesParser : Parser OrderingRules := sepBy orderingRuleParser (skipChar '\n
 
 def pageNumbersParser : Parser PageNumbers := sepBy (sepBy digits (skipChar ',')) (skipChar '\n')
 
-def solve1 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
-  NotImplemented
+def ordered (orderingRules : OrderingRules) (fst : Int) (snd : Int) :=
+    orderingRules.all ( λ (a, b) => ¬(snd == a ∧ fst == b))
 
-def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
+def solve1 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
+  let rec isOrdered (pageNums : List Int) := match pageNums with
+    | [] => true
+    | head :: tail => (tail.all (ordered orderingRules head ·)) ∧ (isOrdered tail)
+
+  pageNumbers.map (λ pageNums =>
+    if isOrdered pageNums then
+      pageNums.get! (pageNums.length / 2)
+    else
+      0
+  )
+  |>.sum
+
+def solve2 (_ : OrderingRules) (_ : PageNumbers) :=
   NotImplemented
 
 def main (args : List String) : IO Unit := do
