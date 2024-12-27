@@ -43,7 +43,7 @@ def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
     (quickSort lesser) ++ [head] ++ (quickSort greater)
   termination_by l => l.length
   decreasing_by
-    all_goals simp_wf
+    all_goals simp
     . sorry
     . sorry
 
