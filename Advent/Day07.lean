@@ -56,5 +56,4 @@ def main (args : List String) : IO Unit := do
       IO.println  s!"Part 1: { sumCalibrations calibrations calibrate1 }"
       IO.println  s!"Part 2: { sumCalibrations calibrations calibrate2 }"
 
-
     main rest
