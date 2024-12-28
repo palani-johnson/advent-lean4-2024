@@ -3,7 +3,6 @@ import Advent.Utils
 
 open Std.Internal.Parsec.String
 
-
 inductive Tile where
   | object
   | empty
@@ -22,7 +21,7 @@ inductive Direction where
   | south
   | east
   | west
-deriving Repr
+deriving BEq, Repr, Hashable
 
 def Direction.fromChar : Char -> Option Direction
   | '^' => .some .north
@@ -30,6 +29,12 @@ def Direction.fromChar : Char -> Option Direction
   | '>' => .some .east
   | '<' => .some .west
   | _   => .none
+
+def Direction.rotate : Direction -> Direction
+| .north => .east
+| .east  => .south
+| .south => .west
+| .west  => .north
 
 instance : ToString Direction where
   toString : _
@@ -42,18 +47,27 @@ instance : ToString Direction where
 structure Point where
   x : Int
   y : Int
-deriving BEq
+deriving BEq, Hashable
 
+def Point.nextPoint (point : Point) : Direction → Point
+| .north => { point with x := point.x - 1}
+| .south => { point with x := point.x + 1}
+| .east  => { point with y := point.y + 1}
+| .west  => { point with y := point.y - 1}
+
+structure LocationState where
+  direction : Direction
+  point : Point
+deriving BEq, Hashable
 
 structure RoomState where
-  guardLocation : Point
-  guardDirection : Direction
+  guard : LocationState
   room : List (List Tile)
 
 instance : ToString RoomState where
   toString r := r.room.enum.map (λ (x, row) => row.enum.map ( λ (y, tile) =>
-    if r.guardLocation == { x := x, y := y } then
-      toString r.guardDirection
+    if r.guard.point == { x := x, y := y } then
+      toString r.guard.direction
     else
       toString tile
   ) |> String.intercalate "")
@@ -73,11 +87,8 @@ def RoomState.fromString (roomString : String) : Option RoomState := do
       if let .some direction := Direction.fromChar tile then
         return {
           room := room
-          guardLocation := {
-            x := x
-            y := y
-          }
-          guardDirection := direction
+          guard.point := { x := x, y := y}
+          guard.direction := direction
         }
 
   .none
@@ -87,49 +98,61 @@ def RoomState.getTile (roomState : RoomState) (point : Point) :=
   | .some tile => tile
   | .none      => .exit
 
-def Point.getNextPoint (point : Point) : Direction → Point
-| .north => { point with x := point.x - 1}
-| .south => { point with x := point.x + 1}
-| .east  => { point with y := point.y + 1}
-| .west  => { point with y := point.y - 1}
+def RoomState.getGuardTile (roomState : RoomState) := roomState.getTile roomState.guard.point
 
-def Direction.rotate : Direction -> Direction
-| .north => .east
-| .east  => .south
-| .south => .west
-| .west  => .north
+def RoomState.step (roomState : RoomState) :=
+  let nextPoint := roomState.guard.point.nextPoint roomState.guard.direction
 
-def RoomState.getGuardTile (roomState : RoomState) := roomState.getTile roomState.guardLocation
+  match roomState.getTile <| nextPoint with
+  | .object => { roomState with
+      guard.direction := roomState.guard.direction.rotate
+    }
+  | _       => { roomState with
+      guard.point := roomState.guard.point.nextPoint roomState.guard.direction
+    }
+
+def RoomState.blockPoint (initRoomState : RoomState) := do
+  let blockerPoint := initRoomState.guard.point.nextPoint initRoomState.guard.direction
+  let blockedRoom <- set2D initRoomState.room blockerPoint.x blockerPoint.y .object
+
+  let mut roomState := {initRoomState with room := blockedRoom}
+  let mut visited : Std.HashSet LocationState := {}
+
+  while roomState.getGuardTile != Tile.exit do
+    if visited.contains roomState.guard then
+      return blockerPoint
+
+    visited := visited.insert roomState.guard
+    roomState := roomState.step
+
+  .none
 
 
 def countTiles (initRoomState : RoomState) : Int := Id.run do
   let mut roomState := initRoomState
-  let mut visited : Array Point := #[]
+  let mut visited : Std.HashSet Point := {}
 
   while roomState.getGuardTile != Tile.exit do
-    match
-      roomState.getTile <| roomState.guardLocation.getNextPoint roomState.guardDirection
-    with
-    | .object =>
-      roomState := {
-        roomState with
-        guardDirection := roomState.guardDirection.rotate
-      }
-    | _ =>
-      if not (visited.contains roomState.guardLocation) then
-        visited := visited.push roomState.guardLocation
+    if not (visited.contains roomState.guard.point) then
+      visited := visited.insert roomState.guard.point
 
-      roomState := {
-        roomState with
-        guardLocation := roomState.guardLocation.getNextPoint roomState.guardDirection
-      }
+    roomState := roomState.step
 
   return visited.toList.length
 
 
+def countLoops (initRoomState : RoomState) : IO Int := do
+  let mut roomState := initRoomState
+  let mut blockPoints : Std.HashSet Point := {}
 
-def solve2 (initRoomState : RoomState) :=
-  NotImplemented
+  while roomState.getGuardTile != Tile.exit do
+    if let .some blockPoint := roomState.blockPoint then
+      if not (blockPoints.contains blockPoint) then
+        blockPoints := blockPoints.insert blockPoint
+
+    roomState := roomState.step
+
+  return blockPoints.size
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -138,12 +161,11 @@ def main (args : List String) : IO Unit := do
     let fileContent <- IO.FS.readFile filePath
 
     match RoomState.fromString fileContent.trim with
-    | .none => IO.eprintln s!"Failed to parse {filePath}"
+    | .none =>
+      IO.eprintln s!"Failed to parse {filePath}"
     | .some roomState =>
-      String.intercalate "\n  " [
-        s!"Solution for {filePath}:",
-        s!"Part 1: {countTiles roomState}",
-        s!"Part 2: {solve2 roomState}"
-      ] |> IO.println
+      IO.println s!"Solution for {filePath}:"
+      IO.println s!"Part 1: { countTiles roomState }"
+      IO.println s!"Part 2: { <- countLoops roomState}"
 
     main rest
