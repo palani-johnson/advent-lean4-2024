@@ -102,7 +102,7 @@ def Direction.rotate : Direction -> Direction
 def RoomState.getGuardTile (roomState : RoomState) := roomState.getTile roomState.guardLocation
 
 
-def countTiles (initRoomState : RoomState) : IO Int := do
+def countTiles (initRoomState : RoomState) : Int := Id.run do
   let mut roomState := initRoomState
   let mut visited : Array Point := #[]
 
@@ -127,6 +127,7 @@ def countTiles (initRoomState : RoomState) : IO Int := do
   return visited.toList.length
 
 
+
 def solve2 (initRoomState : RoomState) :=
   NotImplemented
 
@@ -141,7 +142,7 @@ def main (args : List String) : IO Unit := do
     | .some roomState =>
       String.intercalate "\n  " [
         s!"Solution for {filePath}:",
-        s!"Part 1: {<- countTiles roomState}",
+        s!"Part 1: {countTiles roomState}",
         s!"Part 2: {solve2 roomState}"
       ] |> IO.println
 
