@@ -12,8 +12,8 @@ deriving BEq
 instance : ToString Tile where
   toString : _
   | .object => "□"
-  | .empty => "·"
-  | .exit => "x"
+  | .empty  => "·"
+  | .exit   => "x"
 
 
 inductive Direction where
@@ -40,8 +40,8 @@ instance : ToString Direction where
   toString : _
   | .north => "^"
   | .south => "v"
-  | .east => ">"
-  | .west => "<"
+  | .east  => ">"
+  | .west  => "<"
 
 
 structure Point where
@@ -65,29 +65,34 @@ structure RoomState where
   room : List (List Tile)
 
 instance : ToString RoomState where
-  toString r := r.room.enum.map (λ (x, row) => row.enum.map ( λ (y, tile) =>
-    if r.guard.point == { x := x, y := y } then
-      toString r.guard.direction
-    else
-      toString tile
-  ) |> String.intercalate "")
+  toString r := r.room.enum
+    |>.map ( λ (x, row) => row.enum
+      |>.map ( λ (y, tile) =>
+        if r.guard.point == { x, y } then
+          toString r.guard.direction
+        else
+          toString tile
+      )
+      |> String.intercalate ""
+    )
     |> String.intercalate "\n"
 
 def RoomState.fromString (roomString : String) : Option RoomState := do
   let splitRoomString := roomString.trim.splitOn "\n"
-  let room := splitRoomString.map (λ row =>
-    row.data.map (λ tile => match tile with
-      | '#' => Tile.object
-      | _   => Tile.empty
+  let room := splitRoomString
+    |>.map ( λ row => row.data
+      |>.map ( λ tile => match tile with
+        | '#' => Tile.object
+        | _   => Tile.empty
+      )
     )
-  )
 
   for (row, x) in splitRoomString.zip (List.range splitRoomString.length) do
     for (tile, y) in row.data.zip (List.range row.length) do
       if let .some direction := Direction.fromChar tile then
         return {
-          room := room
-          guard.point := { x := x, y := y}
+          room
+          guard.point := { x, y }
           guard.direction := direction
         }
 
