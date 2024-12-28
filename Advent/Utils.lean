@@ -28,3 +28,14 @@ def set2D (input : List <| List α) (x y : Int) (a : α) := do
   let row := row.set y.toNat a
 
   return input.set x.toNat row
+
+def Std.HashSet.map
+  [BEq α] [Hashable α] [BEq β] [Hashable β]
+  (hashSet : Std.HashSet α) (f : α -> β): Std.HashSet β
+:= Id.run do
+  let mut newHashSet : Std.HashSet β := {}
+
+  for a in hashSet do
+    newHashSet := newHashSet.insert (f a)
+
+  return newHashSet

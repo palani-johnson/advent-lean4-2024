@@ -128,31 +128,32 @@ def RoomState.blockPoint (initRoomState : RoomState) := do
   .none
 
 
-def countTiles (initRoomState : RoomState) : Int := Id.run do
+def RoomState.exitRoom (initRoomState : RoomState) : Option (Std.HashSet LocationState) := do
   let mut roomState := initRoomState
-  let mut visited : Std.HashSet Point := {}
+  let mut visited : Std.HashSet LocationState := {}
 
   while roomState.getGuardTile != Tile.exit do
-    if not (visited.contains roomState.guard.point) then
-      visited := visited.insert roomState.guard.point
+    if visited.contains roomState.guard then
+      .none
 
+    visited := visited.insert roomState.guard
     roomState := roomState.step
 
-  return visited.toList.length
+  return visited
 
 
-def countLoops (initRoomState : RoomState) : IO Int := do
-  let mut roomState := initRoomState
-  let mut blockPoints : Std.HashSet Point := {}
+def countLoops (roomState : RoomState) (visitedLocations : Std.HashSet LocationState) : Int := Id.run do
+  let visitedPoints := visitedLocations.map (·.point)
+  let mut i := 0
 
-  while roomState.getGuardTile != Tile.exit do
-    if let .some blockPoint := roomState.blockPoint then
-      if not (blockPoints.contains blockPoint) then
-        blockPoints := blockPoints.insert blockPoint
+  for {x, y} in visitedPoints do
+    if let .some modifiedRoom := set2D roomState.room x y .object then
+    let modifiedRoomState := {roomState with room := modifiedRoom}
 
-    roomState := roomState.step
+    if let .none := modifiedRoomState.exitRoom then
+      i := i + 1
 
-  return blockPoints.size
+  return i
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -165,7 +166,11 @@ def main (args : List String) : IO Unit := do
       IO.eprintln s!"Failed to parse {filePath}"
     | .some roomState =>
       IO.println s!"Solution for {filePath}:"
-      IO.println s!"Part 1: { countTiles roomState }"
-      IO.println s!"Part 2: { <- countLoops roomState}"
+
+      if let .some visitedLocations := roomState.exitRoom then
+        IO.println s!"Part 1: { visitedLocations.map (·.point) |>.size }"
+        IO.println s!"Part 2: { countLoops roomState visitedLocations }"
+      else
+        IO.println s!"Part 1: guard cannot exit room"
 
     main rest
