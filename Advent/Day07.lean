@@ -30,7 +30,8 @@ def solve1 (calibrations : List Calibration) :=
   | [] => false
   | [v] => check == v
   | a :: b :: rest =>
-    calibrate check ((a + b) :: rest) || calibrate check ((a * b) :: rest)
+    calibrate check ((a + b) :: rest)
+    || calibrate check ((a * b) :: rest)
   termination_by l => l.length
   decreasing_by all_goals simp
 
@@ -46,7 +47,6 @@ def solve2 (calibrations : List Calibration) :=
   | [v] => check == v
   | a :: b :: rest =>
     calibrate check ((a + b) :: rest)
-    || calibrate check ((a * b) :: rest)
     || calibrate check ((a * b) :: rest)
     || calibrate check (s!"{a}{b}".toNat! :: rest)
   termination_by l => l.length
