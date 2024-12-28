@@ -7,15 +7,6 @@ structure Calibration where
   check : Nat
   values : List Nat
 
-def calibrate (check : Nat) : List Nat -> Bool
-| [] => false
-| [v] => check == v
-| a :: b :: rest =>
-  calibrate check ((a + b) :: rest) || calibrate check ((a * b) :: rest)
-termination_by l => l.length
-decreasing_by all_goals simp
-
-
 def lineParser : Parser Calibration := do
   let check <- digits
   let _ <- pstring ": "
@@ -24,37 +15,29 @@ def lineParser : Parser Calibration := do
 
 def inputParser : Parser (List Calibration) := sepBy lineParser (skipChar '\n')
 
+def calibrate1 (check : Nat) : List Nat -> Bool
+| [] => false
+| [v] => check == v
+| a :: b :: rest =>
+  calibrate1 check ((a + b) :: rest)
+  || calibrate1 check ((a * b) :: rest)
+termination_by l => l.length
+decreasing_by all_goals simp
 
-def solve1 (calibrations : List Calibration) :=
-  let rec calibrate (check : Nat) : List Nat -> Bool
-  | [] => false
-  | [v] => check == v
-  | a :: b :: rest =>
-    calibrate check ((a + b) :: rest)
-    || calibrate check ((a * b) :: rest)
-  termination_by l => l.length
-  decreasing_by all_goals simp
+def calibrate2 (check : Nat) : List Nat -> Bool
+| [] => false
+| [v] => check == v
+| a :: b :: rest =>
+  calibrate2 check ((a + b) :: rest)
+  || calibrate2 check ((a * b) :: rest)
+  || calibrate2 check (s!"{a}{b}".toNat! :: rest)
+termination_by l => l.length
+decreasing_by all_goals simp
 
-  calibrations.foldl (init := 0) (λ acc c =>
-    if calibrate c.check c.values
-    then acc + c.check
-    else acc
-  )
-
-def solve2 (calibrations : List Calibration) :=
-  let rec calibrate (check : Nat) : List Nat -> Bool
-  | [] => false
-  | [v] => check == v
-  | a :: b :: rest =>
-    calibrate check ((a + b) :: rest)
-    || calibrate check ((a * b) :: rest)
-    || calibrate check (s!"{a}{b}".toNat! :: rest)
-  termination_by l => l.length
-  decreasing_by all_goals simp
-
-  calibrations.foldl (init := 0) (λ acc c =>
-    if calibrate c.check c.values
-    then acc + c.check
+def sumCalibrations (calibrations: List Calibration) (calibrate : Nat -> List Nat -> Bool) :=
+  calibrations.foldl (init := 0) (λ acc {check, values} =>
+    if calibrate check values
+    then acc + check
     else acc
   )
 
@@ -68,10 +51,10 @@ def main (args : List String) : IO Unit := do
     match parseResult with
     | .error _ =>
       IO.eprintln s!"Failed to parse {filePath}"
-    | .ok problemInput =>
+    | .ok calibrations =>
       IO.println  s!"Solution for {filePath}:"
-      IO.println  s!"Part 1: {problemInput |> solve1}"
-      IO.println  s!"Part 2: {problemInput |> solve2}"
+      IO.println  s!"Part 1: { sumCalibrations calibrations calibrate1 }"
+      IO.println  s!"Part 2: { sumCalibrations calibrations calibrate2 }"
 
 
     main rest
