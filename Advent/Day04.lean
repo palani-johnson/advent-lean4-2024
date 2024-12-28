@@ -66,10 +66,8 @@ def main (args : List String) : IO Unit := do
     let fileContent <- IO.FS.readFile filePath
     let input := fileContent.trim |> splitInput
 
-    String.intercalate "\n  " [
-      s!"Solution for {filePath}:",
-      s!"Part 1: {input |> solve1}",
-      s!"Part 2: {input |> solve2}",
-    ] |> IO.println
+    IO.println  s!"Solution for {filePath}:"
+    IO.println  s!"Part 1: {input |> solve1}"
+    IO.println  s!"Part 2: {input |> solve2}"
 
     main rest

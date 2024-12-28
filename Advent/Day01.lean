@@ -6,9 +6,9 @@ open Std.Internal.Parsec.String
 def ProblemInput := List (Int × Int)
 
 def lineParser : Parser (Int × Int) := do
-  let a ← digits
-  let _ ← ws
-  let b ← digits
+  let a <- digits
+  let _ <- ws
+  let b <- digits
   pure (a, b)
 
 def inputParser : Parser ProblemInput := sepBy lineParser (skipChar '\n')
@@ -31,12 +31,12 @@ def main (args : List String) : IO Unit := do
     let parseResult := inputParser.run fileContent.trim
 
     match parseResult with
-    | .error _ => IO.eprintln s!"Failed to parse {filePath}"
+    | .error _ =>
+      IO.eprintln s!"Failed to parse {filePath}"
     | .ok problemInput =>
-      String.intercalate "\n  " [
-        s!"Solution for {filePath}:",
-        s!"Part 1: {problemInput |> solve1}",
-        s!"Part 2: {problemInput |> solve2}"
-      ] |> IO.println
+      IO.println s!"Solution for {filePath}:"
+      IO.println s!"Part 1: {problemInput |> solve1}"
+      IO.println s!"Part 2: {problemInput |> solve2}"
+
 
     main rest

@@ -7,9 +7,9 @@ def OrderingRules := List (Int × Int)
 def PageNumbers := List (List Int)
 
 def orderingRuleParser : Parser (Int × Int) := do
-  let a ← digits
-  let _ ← pchar '|'
-  let b ← digits
+  let a <- digits
+  let _ <- pchar '|'
+  let b <- digits
   return (a, b)
 
 def rulesParser : Parser OrderingRules := sepBy orderingRuleParser (skipChar '\n')
@@ -69,11 +69,10 @@ def main (args : List String) : IO Unit := do
 
     match parsedOrderingRules, parsedPageNumbers with
     | .ok orderingRules, .ok pageNumbers =>
-      String.intercalate "\n  " [
-        s!"Solution for {filePath}:",
-        s!"Part 1: {solve1 orderingRules pageNumbers}",
-        s!"Part 2: {solve2 orderingRules pageNumbers}"
-      ] |> IO.println
-    | _, _ => IO.eprintln s!"Failed to parse {filePath}"
+      IO.println s!"Solution for {filePath}:"
+      IO.println s!"Part 1: {solve1 orderingRules pageNumbers}"
+      IO.println s!"Part 2: {solve2 orderingRules pageNumbers}"
+    | _, _ =>
+      IO.eprintln s!"Failed to parse {filePath}"
 
     main rest

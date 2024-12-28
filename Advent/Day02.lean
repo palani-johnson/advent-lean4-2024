@@ -47,12 +47,11 @@ def main (args : List String) : IO Unit := do
     let parseResult := inputParser.run fileContent.trim
 
     match parseResult with
-    | .error _ => IO.eprintln s!"Failed to parse {filePath}"
+    | .error _ =>
+      IO.eprintln s!"Failed to parse {filePath}"
     | .ok problemInput =>
-      String.intercalate "\n  " [
-        s!"Solution for {filePath}:",
-        s!"Part 1: {problemInput |> solve1}",
-        s!"Part 2: {problemInput |> solve2}"
-      ] |> IO.println
+      IO.println s!"Solution for {filePath}:"
+      IO.println s!"Part 1: {problemInput |> solve1}"
+      IO.println s!"Part 2: {problemInput |> solve2}"
 
     main rest
