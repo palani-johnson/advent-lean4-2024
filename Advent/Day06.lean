@@ -10,10 +10,10 @@ inductive Tile where
 deriving BEq
 
 instance : ToString Tile where
-  toString : _
-  | .object => "□"
-  | .empty  => "·"
-  | .exit   => "x"
+  toString
+    | .object => "□"
+    | .empty  => "·"
+    | .exit   => "x"
 
 
 inductive Direction where
@@ -37,11 +37,11 @@ def Direction.rotate : Direction -> Direction
 | .west  => .north
 
 instance : ToString Direction where
-  toString : _
-  | .north => "^"
-  | .south => "v"
-  | .east  => ">"
-  | .west  => "<"
+  toString
+    | .north => "^"
+    | .south => "v"
+    | .east  => ">"
+    | .west  => "<"
 
 
 structure Point where
