@@ -4,8 +4,6 @@ export def fetch-aoc-day [day : int] {
 
   mkdir $dir
 
-  echo $"Fetching input for Day ($day_padded)..."
-
   http get -H ["Cookie" $"session=($env.AOC_SESSION_TOKEN)"] --raw $"https://adventofcode.com/2024/day/($day)/input"
     | str trim
     | save -f $"($dir)/input.txt"
