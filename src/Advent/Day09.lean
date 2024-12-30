@@ -14,6 +14,7 @@ inductive DiskBlock where
   | file (id : Nat)
 
 def DiskArray := Array DiskBlock
+deriving Inhabited
 
 -- Functions
 
@@ -33,12 +34,32 @@ Turn
 into
   `00992111777.44.333....5555.6666.....8888..`
 -/
-def FileArray.condense (fileArray : FileArray) : FileArray := Id.run do
-  let mut frontPtr := 0
-  let mut backPtr := fileArray.size - 1
-  let mut fileArray := fileArray
+def FileArray.condense (fileArray : FileArray) : FileArray := fileArra
 
-  fileArray
+partial def DiskArray.condense! (diskArray : DiskArray) (left right : Nat) : DiskArray :=
+  if left >= right then
+    diskArray
+  else
+    let nextLeft  := left  + 1
+    let nextRight := right - 1
+
+    match diskArray.get? left, diskArray.get? right with
+    -- skip front
+    | .some (.file _), .some _ =>
+      diskArray.condense! nextLeft right
+
+    -- skip back
+    | .some .empty, .some .empty =>
+      diskArray.condense! left nextRight
+
+    -- swap
+    | .some .empty, .some (.file id) =>
+      condense!
+        (diskArray.set! left (.file id) |>.set! right .empty)
+        nextLeft nextRight
+
+    -- cannot hit?
+    | _, _ => panic! "Should not be able to get here"
 
 /--
 Turn
@@ -46,31 +67,7 @@ Turn
 into
   `0099811188827773336446555566..............`
 -/
-def DiskArray.condense (diskArray : DiskArray) : DiskArray := Id.run do
-  let mut frontPtr := 0
-  let mut backPtr := diskArray.size - 1
-  let mut diskArray := diskArray
-
-  while frontPtr < backPtr do
-    match diskArray.get? frontPtr, diskArray.get? backPtr with
-    -- skip front
-    | .some (.file _), .some _ =>
-      frontPtr := frontPtr + 1
-
-    -- skip back
-    | .some .empty, .some .empty =>
-      backPtr := backPtr - 1
-
-    -- swap
-    | .some .empty, .some (.file id) =>
-      diskArray := (diskArray.set! frontPtr (.file id)).set! backPtr .empty
-      frontPtr := frontPtr + 1
-      backPtr := backPtr - 1
-
-    -- cannot hit?
-    | _, _ => break
-
-  diskArray
+def DiskArray.condense (diskArray : DiskArray) := diskArray.condense! 0 (diskArray.size - 1)
 
 def DiskArray.checksum (diskArray : DiskArray) := diskArray.toList.enum
   |>.map (λ (i, b) => match b with
@@ -92,17 +89,11 @@ def FileArray.checksum (fileArray : FileArray) := fileArray.intoDiskArray.checks
 
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
-    IO.println s!"Solution for {filePath}:"
+def main := aocMain λ file => do
+  IO.println s!"Solution for {file.path}:"
 
-    let diskArray := DiskArray.fromString fileContent
-    IO.println s!"Part 1: {diskArray.condense.checksum}"
+  let diskArray := DiskArray.fromString file.content
+  IO.println s!"Part 1: {diskArray.condense.checksum}"
 
-    let fileArray := FileArray.fromString fileContent
-    IO.println s!"Part 1: {fileArray.checksum}"
-
-    main rest
+  let fileArray := FileArray.fromString file.content
+  IO.println s!"Part 1: {fileArray.checksum}"

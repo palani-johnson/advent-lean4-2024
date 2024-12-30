@@ -51,19 +51,13 @@ def sumCalibrations (calibrations: List Calibration) (calibrate : Nat -> List Na
 
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
-    let parseResult := inputParser.run fileContent.trim
+def main := aocMain λ file => do
+  let parseResult := inputParser.run file.content
 
-    match parseResult with
-    | .error _ =>
-      IO.eprintln s!"Failed to parse {filePath}"
-    | .ok calibrations =>
-      IO.println  s!"Solution for {filePath}:"
-      IO.println  s!"Part 1: { sumCalibrations calibrations calibrate1 }"
-      IO.println  s!"Part 2: { sumCalibrations calibrations calibrate2 }"
-
-    main rest
+  match parseResult with
+  | .error _ =>
+    IO.eprintln s!"Failed to parse {file.path}"
+  | .ok calibrations =>
+    IO.println  s!"Solution for {file.path}:"
+    IO.println  s!"Part 1: { sumCalibrations calibrations calibrate1 }"
+    IO.println  s!"Part 2: { sumCalibrations calibrations calibrate2 }"

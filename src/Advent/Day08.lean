@@ -38,8 +38,8 @@ def countAntinodesV1
 def countAntinodesV2
   (antennaPoints : Std.HashMap Char (Std.HashSet Point))
   (size : Point)
-  : IO Int
-:=  do
+  : Int
+:= Id.run do
   let mut antinodes : Std.HashSet Point := {}
   let getAntinodes (p1 p2 : Point) : List Point := Id.run do
     let mut antinodes := [p1, p2]
@@ -71,32 +71,25 @@ def countAntinodesV2
 
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
+def main := aocMain λ file => do
+  let mut antennaPoints : Std.HashMap Char (Std.HashSet Point) := {}
+  let mut sizeX := 0
+  let mut sizeY := 0
 
-    let mut antennaPoints : Std.HashMap Char (Std.HashSet Point) := {}
-    let mut sizeX := 0
-    let mut sizeY := 0
-
-    for (x, row) in fileContent.trim.splitOn "\n" |>.enum do
-      for (y, antenna) in row.trim.data.enum do
-        if antenna != '.' && antenna != '#' then
-          antennaPoints := antennaPoints.insert antenna (
-              antennaPoints.getD antenna {}
-              |>.insert {x, y}
-            )
+  for (x, row) in file.content.splitOn "\n" |>.enum do
+    for (y, antenna) in row.trim.data.enum do
+      if antenna != '.' && antenna != '#' then
+        antennaPoints := antennaPoints.insert antenna (
+            antennaPoints.getD antenna {}
+            |>.insert {x, y}
+          )
 
 
-        sizeY := max sizeY y
-      sizeX := max sizeX x
+      sizeY := max sizeY y
+    sizeX := max sizeX x
 
-    let size := { x := sizeX + 1, y := sizeY + 1 }
+  let size := { x := sizeX + 1, y := sizeY + 1 }
 
-    IO.println s!"Solution for {filePath} {sizeX} by {sizeY}:"
-    IO.println s!"Part 1: {countAntinodesV1 antennaPoints size}"
-    IO.println s!"Part 2: {<- countAntinodesV2 antennaPoints size}"
-
-    main rest
+  IO.println s!"Solution for {file.path} {sizeX} by {sizeY}:"
+  IO.println s!"Part 1: {countAntinodesV1 antennaPoints size}"
+  IO.println s!"Part 2: {countAntinodesV2 antennaPoints size}"

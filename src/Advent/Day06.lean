@@ -161,22 +161,15 @@ def countLoops (roomState : RoomState) (visitedLocations : Std.HashSet LocationS
 
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
+def main := aocMain λ file => do
+  match RoomState.fromString file.content with
+  | .none =>
+    IO.eprintln s!"Failed to parse {file.path}"
+  | .some roomState =>
+    IO.println s!"Solution for {file.path}:"
 
-    match RoomState.fromString fileContent.trim with
-    | .none =>
-      IO.eprintln s!"Failed to parse {filePath}"
-    | .some roomState =>
-      IO.println s!"Solution for {filePath}:"
-
-      if let .some visitedLocations := roomState.exitRoom then
-        IO.println s!"Part 1: { visitedLocations.map (·.point) |>.size }"
-        IO.println s!"Part 2: { countLoops roomState visitedLocations }"
-      else
-        IO.println s!"Part 1: guard cannot exit room"
-
-    main rest
+    if let .some visitedLocations := roomState.exitRoom then
+      IO.println s!"Part 1: { visitedLocations.map (·.point) |>.size }"
+      IO.println s!"Part 2: { countLoops roomState visitedLocations }"
+    else
+      IO.println s!"Part 1: guard cannot exit room"

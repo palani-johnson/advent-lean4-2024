@@ -65,15 +65,9 @@ def solve2 (input : ProblemInput) :=
 
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
-    let input := fileContent.trim |> splitInput
+def main := aocMain λ file => do
+  let input := file.content |> splitInput
 
-    IO.println  s!"Solution for {filePath}:"
-    IO.println s!"Part 1: {solve1 input}"
-    IO.println s!"Part 2: {solve2 input}"
-
-    main rest
+  IO.println  s!"Solution for {file.path}:"
+  IO.println s!"Part 1: {solve1 input}"
+  IO.println s!"Part 2: {solve2 input}"

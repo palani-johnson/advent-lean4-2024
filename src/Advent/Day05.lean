@@ -41,49 +41,47 @@ def solve1 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
   )
   |>.sum
 
-def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
-  -- TODO: use mergesort
-  let rec quickSort : List Int → List Int
-  | [] => []
-  | head :: rest =>
-    let lesser := rest.filter (ordered orderingRules head ·)
-    let greater := rest.filter (not <| ordered orderingRules head ·)
+section
+  def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
+    -- TODO: use mergesort
+    let rec quickSort : List Int → List Int
+    | [] => []
+    | head :: rest =>
+      let lesser := rest.filter (ordered orderingRules head ·)
+      let greater := rest.filter (not <| ordered orderingRules head ·)
 
-    (quickSort lesser) ++ [head] ++ (quickSort greater)
-  termination_by l => l.length
-  decreasing_by
-    all_goals simp
-    . sorry
-    . sorry
+      (quickSort lesser) ++ [head] ++ (quickSort greater)
+    termination_by l => l.length
+    decreasing_by
+      all_goals simp
+      . sorry
+      . sorry
 
 
-  pageNumbers.map (λ pageNums =>
-    if not (isOrdered orderingRules pageNums) then
-      let pageNums := quickSort pageNums
-      pageNums.get! (pageNums.length / 2)
-    else
-      0
-  )
-  |>.sum
 
+
+    pageNumbers.map (λ pageNums =>
+      if not (isOrdered orderingRules pageNums) then
+
+        let pageNums := pageNums.mergeSort
+        pageNums.get! (pageNums.length / 2)
+      else
+        0
+    )
+    |>.sum
+end
 -- Main
 
-def main (args : List String) : IO Unit := do
-  match args with
-  | [] => return
-  | filePath :: rest =>
-    let fileContent <- IO.FS.readFile filePath
-    if let [orderingRulesString, pageNumbersString] := fileContent.trim |>.splitOn "\n\n" then
+def main := aocMain λ file => do
+    if let [orderingRulesString, pageNumbersString] := file.content |>.splitOn "\n\n" then
 
     let parsedOrderingRules := rulesParser.run orderingRulesString
     let parsedPageNumbers := pageNumbersParser.run pageNumbersString
 
     match parsedOrderingRules, parsedPageNumbers with
     | .ok orderingRules, .ok pageNumbers =>
-      IO.println s!"Solution for {filePath}:"
+      IO.println s!"Solution for {file.path}:"
       IO.println s!"Part 1: {solve1 orderingRules pageNumbers}"
       IO.println s!"Part 2: {solve2 orderingRules pageNumbers}"
     | _, _ =>
-      IO.eprintln s!"Failed to parse {filePath}"
-
-    main rest
+      IO.eprintln s!"Failed to parse {file.path}"
