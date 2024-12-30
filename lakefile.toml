@@ -1,13 +1,14 @@
 name = "Advent"
 version = "0.1.0"
 defaultTargets = ["advent"]
-
+srcDir = "src"
 
 [[lean_lib]]
 name = "Advent"
 
 [[lean_lib]]
 name = "Utils"
+
 
 [[lean_exe]]
 name = "day01"
