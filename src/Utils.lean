@@ -6,14 +6,13 @@ structure File where
   path : System.FilePath
   content : String
 
-def aocMain (mainFn : File -> IO Unit) (args : List String) : IO Unit := do
+partial def aocMain (mainFn : File -> IO Unit) (args : List String) : IO Unit := do
   for path in args do
     let path : System.FilePath := path
 
-    if <- path.isDir then
+    if <- (path : System.FilePath).isDir then
       for path in <- path.readDir do
-        let fileContent <- IO.FS.readFile path.path
-        mainFn ⟨path.path, fileContent.trim⟩
+        aocMain mainFn [path.path.toString]
 
     else
       let fileContent <- IO.FS.readFile path
