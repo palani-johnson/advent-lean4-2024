@@ -1,17 +1,25 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 def Reports := List (List Int)
-
-def inputParser : Parser Reports := sepBy (sepBy digits (skipChar ' ')) (skipChar '\n')
 
 inductive Run where
   | incresing
   | decresing
   | notsafe
 deriving BEq
+
+-- Parsing
+
+section
+  open Std.Internal.Parsec.String
+
+  def inputParser : Parser Reports := sepBy (sepBy digits (skipChar ' ')) (skipChar '\n')
+end
+
+-- Functions
 
 def compareTwo (a b : Int) :=
   let diff := (a - b).natAbs
@@ -39,6 +47,8 @@ def solve2 (reports : Reports) :=
 
   (reports.map isSafe2).count true
 
+-- Main
+
 def main (args : List String) : IO Unit := do
   match args with
   | [] => return
@@ -51,7 +61,7 @@ def main (args : List String) : IO Unit := do
       IO.eprintln s!"Failed to parse {filePath}"
     | .ok problemInput =>
       IO.println s!"Solution for {filePath}:"
-      IO.println s!"Part 1: {problemInput |> solve1}"
-      IO.println s!"Part 2: {problemInput |> solve2}"
+      IO.println s!"Part 1: {solve1 problemInput}"
+      IO.println s!"Part 2: {solve2 problemInput}"
 
     main rest

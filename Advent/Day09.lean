@@ -1,14 +1,21 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
-open Std.Internal.Parsec
+-- Types
 
 inductive FileBlock where
   | empty (size : Nat)
   | file (id : Nat) (size : Nat)
 
 def FileArray := Array FileBlock
+
+inductive DiskBlock where
+  | empty
+  | file (id : Nat)
+
+def DiskArray := Array DiskBlock
+
+-- Functions
 
 def FileArray.fromString (string : String) : FileArray := string.trim.data.enum
   |>.map ( λ (i, c) =>
@@ -32,14 +39,6 @@ def FileArray.condense (fileArray : FileArray) : FileArray := Id.run do
   let mut fileArray := fileArray
 
   fileArray
-
-
-
-inductive DiskBlock where
-  | empty
-  | file (id : Nat)
-
-def DiskArray := Array DiskBlock
 
 /--
 Turn
@@ -91,6 +90,7 @@ def DiskArray.fromString (string : String) : DiskArray := FileArray.fromString s
 
 def FileArray.checksum (fileArray : FileArray) := fileArray.intoDiskArray.checksum
 
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -103,6 +103,6 @@ def main (args : List String) : IO Unit := do
     IO.println s!"Part 1: {diskArray.condense.checksum}"
 
     let fileArray := FileArray.fromString fileContent
-    -IO.println s!"Part 1: {fileArray.checksum}"
+    IO.println s!"Part 1: {fileArray.checksum}"
 
     main rest

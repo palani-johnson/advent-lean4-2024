@@ -1,20 +1,13 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 inductive Tile where
   | object
   | empty
   | exit
 deriving BEq
-
-instance : ToString Tile where
-  toString
-    | .object => "□"
-    | .empty  => "·"
-    | .exit   => "x"
-
 
 inductive Direction where
   | north
@@ -23,37 +16,10 @@ inductive Direction where
   | west
 deriving BEq, Repr, Hashable
 
-def Direction.fromChar : Char -> Option Direction
-  | '^' => .some .north
-  | 'v' => .some .south
-  | '>' => .some .east
-  | '<' => .some .west
-  | _   => .none
-
-def Direction.rotate : Direction -> Direction
-| .north => .east
-| .east  => .south
-| .south => .west
-| .west  => .north
-
-instance : ToString Direction where
-  toString
-    | .north => "^"
-    | .south => "v"
-    | .east  => ">"
-    | .west  => "<"
-
-
 structure Point where
   x : Int
   y : Int
 deriving BEq, Hashable
-
-def Point.nextPoint (point : Point) : Direction → Point
-| .north => { point with x := point.x - 1}
-| .south => { point with x := point.x + 1}
-| .east  => { point with y := point.y + 1}
-| .west  => { point with y := point.y - 1}
 
 structure LocationState where
   direction : Direction
@@ -63,6 +29,40 @@ deriving BEq, Hashable
 structure RoomState where
   guard : LocationState
   room : List (List Tile)
+
+-- Functions
+
+instance : ToString Tile where
+  toString
+  | .object => "□"
+  | .empty  => "·"
+  | .exit   => "x"
+
+def Direction.fromChar : Char -> Option Direction
+| '^' => .some .north
+| 'v' => .some .south
+| '>' => .some .east
+| '<' => .some .west
+| _   => .none
+
+def Direction.rotate : Direction -> Direction
+| .north => .east
+| .east  => .south
+| .south => .west
+| .west  => .north
+
+instance : ToString Direction where
+  toString
+  | .north => "^"
+  | .south => "v"
+  | .east  => ">"
+  | .west  => "<"
+
+def Point.nextPoint (point : Point) : Direction → Point
+| .north => { point with x := point.x - 1}
+| .south => { point with x := point.x + 1}
+| .east  => { point with y := point.y + 1}
+| .west  => { point with y := point.y - 1}
 
 instance : ToString RoomState where
   toString r := r.room.enum
@@ -132,7 +132,6 @@ def RoomState.blockPoint (initRoomState : RoomState) := do
 
   .none
 
-
 def RoomState.exitRoom (initRoomState : RoomState) : Option (Std.HashSet LocationState) := do
   let mut roomState := initRoomState
   let mut visited : Std.HashSet LocationState := {}
@@ -159,6 +158,8 @@ def countLoops (roomState : RoomState) (visitedLocations : Std.HashSet LocationS
       i := i + 1
 
   return i
+
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with

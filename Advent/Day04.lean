@@ -1,11 +1,15 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 def ProblemInput := List <| List Char
 
+-- Parsing
+
 def splitInput (input : String) : ProblemInput := input.splitOn "\n" |>.map (·.data)
+
+-- Functions
 
 def solve1 (input : ProblemInput) :=
   let numRows := input.length
@@ -59,6 +63,8 @@ def solve2 (input : ProblemInput) :=
   )
   |>.sum
 
+-- Main
+
 def main (args : List String) : IO Unit := do
   match args with
   | [] => return
@@ -67,7 +73,7 @@ def main (args : List String) : IO Unit := do
     let input := fileContent.trim |> splitInput
 
     IO.println  s!"Solution for {filePath}:"
-    IO.println  s!"Part 1: {input |> solve1}"
-    IO.println  s!"Part 2: {input |> solve2}"
+    IO.println s!"Part 1: {solve1 input}"
+    IO.println s!"Part 2: {solve2 input}"
 
     main rest

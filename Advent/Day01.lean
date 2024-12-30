@@ -1,17 +1,30 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 def ProblemInput := List (Int × Int)
 
-def lineParser : Parser (Int × Int) := do
-  let a <- digits
-  let _ <- ws
-  let b <- digits
-  pure (a, b)
+--Parsing
 
-def inputParser : Parser ProblemInput := sepBy lineParser (skipChar '\n')
+section
+  open Std.Internal.Parsec.String
+
+  def lineParser : Parser (Int × Int) := do
+    let a <- digits
+    let _ <- ws
+    let b <- digits
+    pure (a, b)
+
+  def inputParser : Parser ProblemInput := sepBy (do
+      let a <- digits
+      let _ <- ws
+      let b <- digits
+      pure (a, b)
+    ) (skipChar '\n')
+end
+
+-- Functions
 
 def solve1 (problemInput : ProblemInput) :=
   let (lefts, rights) := problemInput.unzip
@@ -22,6 +35,8 @@ def solve2 (problemInput : ProblemInput) :=
   let (lefts, rights) := problemInput.unzip
 
   lefts.foldl (λ acc left => acc + left * rights.count left) 0
+
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -35,8 +50,8 @@ def main (args : List String) : IO Unit := do
       IO.eprintln s!"Failed to parse {filePath}"
     | .ok problemInput =>
       IO.println s!"Solution for {filePath}:"
-      IO.println s!"Part 1: {problemInput |> solve1}"
-      IO.println s!"Part 2: {problemInput |> solve2}"
+      IO.println s!"Part 1: {solve1 problemInput}"
+      IO.println s!"Part 2: {solve2 problemInput}"
 
 
     main rest

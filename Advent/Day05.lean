@@ -1,20 +1,28 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 def OrderingRules := List (Int × Int)
 def PageNumbers := List (List Int)
 
-def orderingRuleParser : Parser (Int × Int) := do
-  let a <- digits
-  let _ <- pchar '|'
-  let b <- digits
-  return (a, b)
+-- Parsing
 
-def rulesParser : Parser OrderingRules := sepBy orderingRuleParser (skipChar '\n')
+section
+  open Std.Internal.Parsec.String
 
-def pageNumbersParser : Parser PageNumbers := sepBy (sepBy digits (skipChar ',')) (skipChar '\n')
+  def orderingRuleParser : Parser (Int × Int) := do
+    let a <- digits
+    let _ <- pchar '|'
+    let b <- digits
+    return (a, b)
+
+  def rulesParser : Parser OrderingRules := sepBy orderingRuleParser (skipChar '\n')
+
+  def pageNumbersParser : Parser PageNumbers := sepBy (sepBy digits (skipChar ',')) (skipChar '\n')
+end
+
+-- Functions
 
 def ordered (orderingRules : OrderingRules) (fst : Int) (snd : Int) :=
     orderingRules.all ( λ (a, b) => ¬(snd == a ∧ fst == b))
@@ -34,6 +42,7 @@ def solve1 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
   |>.sum
 
 def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
+  -- TODO: use mergesort
   let rec quickSort : List Int → List Int
   | [] => []
   | head :: rest =>
@@ -56,6 +65,8 @@ def solve2 (orderingRules : OrderingRules) (pageNumbers : PageNumbers) :=
       0
   )
   |>.sum
+
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with

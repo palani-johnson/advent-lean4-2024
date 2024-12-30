@@ -1,12 +1,14 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 structure Point where
   x : Int
   y : Int
 deriving BEq, Hashable
+
+-- Functions
 
 def getAntinode (p1 p2 : Point) : Point :=
   { x := 2 * p1.x - p2.x, y := 2 * p1.y - p2.y }
@@ -66,6 +68,8 @@ def countAntinodesV2
           antinodes := antinodes.insertMany (getAntinodes p1 p2)
 
   return antinodes.size
+
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with

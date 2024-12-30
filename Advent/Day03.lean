@@ -1,8 +1,7 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
-open Std.Internal.Parsec
+-- Types
 
 inductive Instruction where
   | iMul (a b : Int)
@@ -12,29 +11,38 @@ deriving BEq, Repr
 
 def ProblemInput := Array Instruction
 
-def parseMul : Parser Instruction := do
-  let _ <- pstring "mul("
-  let a <- digits
-  let _ <- pchar ','
-  let b <- digits
-  let _ <- pchar ')'
+-- Parsing
 
-  return .iMul a b
+section
+  open Std.Internal.Parsec.String
+  open Std.Internal.Parsec
 
-def parseDo : Parser Instruction := do
-  let _ <- pstring "do()"
-  return .iDo
+  def parseMul : Parser Instruction := do
+    let _ <- pstring "mul("
+    let a <- digits
+    let _ <- pchar ','
+    let b <- digits
+    let _ <- pchar ')'
 
-def parseDont : Parser Instruction := do
-  let _ <- pstring "don't()"
-  return .iDont
+    return .iMul a b
 
-partial def parseFirstMul : Parser Instruction := attempt parseMul
-  <|> attempt parseDo
-  <|> attempt parseDont
-  <|> attempt (skip *> parseFirstMul)
+  def parseDo : Parser Instruction := do
+    let _ <- pstring "do()"
+    return .iDo
 
-def parseInput : Parser ProblemInput := many parseFirstMul
+  def parseDont : Parser Instruction := do
+    let _ <- pstring "don't()"
+    return .iDont
+
+  partial def parseFirstMul : Parser Instruction := attempt parseMul
+    <|> attempt parseDo
+    <|> attempt parseDont
+    <|> attempt (skip *> parseFirstMul)
+
+  def parseInput : Parser ProblemInput := many parseFirstMul
+end
+
+-- Functions
 
 def solve1 (problemInput : ProblemInput) := problemInput.toList
   |>.map ( λ
@@ -52,6 +60,8 @@ def solve2 (problemInput : ProblemInput) := problemInput.toList
   )
   |>.2
 
+-- Main
+
 def main (args : List String) : IO Unit := do
   match args with
   | [] => return
@@ -64,7 +74,7 @@ def main (args : List String) : IO Unit := do
       IO.eprintln s!"Failed to parse {filePath}"
     | .ok problemInput =>
       IO.println  s!"Solution for {filePath}:"
-      IO.println  s!"Part 1: {problemInput |> solve1}"
-      IO.println  s!"Part 2: {problemInput |> solve2}"
+      IO.println s!"Part 1: {solve1 problemInput}"
+      IO.println s!"Part 2: {solve2 problemInput}"
 
     main rest

@@ -1,19 +1,27 @@
 import Std
-import Advent.Utils
+import Utils
 
-open Std.Internal.Parsec.String
+-- Types
 
 structure Calibration where
   check : Nat
   values : List Nat
 
-def lineParser : Parser Calibration := do
-  let check <- digits
-  let _ <- pstring ": "
-  let values <- sepBy digits (skipChar ' ')
-  return { check, values }
+-- Parsing
 
-def inputParser : Parser (List Calibration) := sepBy lineParser (skipChar '\n')
+section
+  open Std.Internal.Parsec.String
+
+  def lineParser : Parser Calibration := do
+    let check <- digits
+    let _ <- pstring ": "
+    let values <- sepBy digits (skipChar ' ')
+    return { check, values }
+
+  def inputParser : Parser (List Calibration) := sepBy lineParser (skipChar '\n')
+end
+
+-- Functions
 
 def calibrate1 (check : Nat) : List Nat -> Bool
 | [] => false
@@ -40,6 +48,8 @@ def sumCalibrations (calibrations: List Calibration) (calibrate : Nat -> List Na
     then acc + check
     else acc
   )
+
+-- Main
 
 def main (args : List String) : IO Unit := do
   match args with
