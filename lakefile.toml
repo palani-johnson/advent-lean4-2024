@@ -6,6 +6,9 @@ defaultTargets = ["advent"]
 [[lean_lib]]
 name = "Advent"
 
+[[lean_lib]]
+name = "Utils"
+
 [[lean_exe]]
 name = "day01"
 root = "Advent.Day01"
