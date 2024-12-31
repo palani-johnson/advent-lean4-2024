@@ -6,6 +6,7 @@ import Utils
 inductive FileBlock where
   | empty (size : Nat)
   | file (id : Nat) (size : Nat)
+deriving Inhabited
 
 def FileArray := Array FileBlock
 deriving Inhabited
@@ -13,6 +14,7 @@ deriving Inhabited
 inductive DiskBlock where
   | empty
   | file (id : Nat)
+deriving Inhabited
 
 def DiskArray := Array DiskBlock
 deriving Inhabited
@@ -47,15 +49,15 @@ partial def FileArray.condense! (fileArray : FileArray) (id left right: Nat) : F
     let nextLeft  := left  + 1
     let nextRight := right - 1
 
-    match fileArray.get? right with
-    | .some (.file fileId fileSize)  =>
+    match fileArray.get! right with
+    | .file fileId fileSize  =>
       -- keep searching for file
       if id != fileId then
         fileArray.condense! id left nextRight
 
       -- found the file
-      else match fileArray.get? left with
-        | .some (.empty emptySize) =>
+      else match fileArray.get! left with
+        | .empty emptySize =>
           -- found suitable empty space
           if emptySize >= fileSize then
             let fileArray := fileArray.map (#[.])
@@ -67,19 +69,13 @@ partial def FileArray.condense! (fileArray : FileArray) (id left right: Nat) : F
             fileArray.condense! (id - 1) 0 (fileArray.size - 1)
           else
             fileArray.condense! id nextLeft right
-        | .some _ =>
+        | _ =>
           -- keep searching for empty
           fileArray.condense! id nextLeft right
 
-        -- cannot hit?
-        | _ => panic! "Should not be able to get here 2"
-
     -- keep searching for file
-    | .some _ =>
+    | _ =>
       fileArray.condense! id left nextRight
-
-    -- cannot hit?
-    | _ => panic! "Should not be able to get here"
 
 /--
 Turn
@@ -96,29 +92,26 @@ def FileArray.condense (fileArray : FileArray) : FileArray :=
   fileArray.condense! maxId 0 (fileArray.size - 1)
 
 partial def DiskArray.condense! (diskArray : DiskArray) (left right : Nat) : DiskArray :=
-  if left >= right then
+  if _: left >= right then
     diskArray
   else
-    let nextLeft  := left  + 1
+    let nextLeft  := left + 1
     let nextRight := right - 1
 
-    match diskArray.get? left, diskArray.get? right with
+    match diskArray.get! left, diskArray.get! right with
     -- skip front
-    | .some (.file _), .some _ =>
+    | .file _, _ =>
       diskArray.condense! nextLeft right
 
     -- skip back
-    | .some .empty, .some .empty =>
+    | .empty, .empty =>
       diskArray.condense! left nextRight
 
     -- swap
-    | .some .empty, .some (.file id) =>
+    | .empty, .file id =>
       condense!
         (diskArray.set! left (.file id) |>.set! right .empty)
         nextLeft nextRight
-
-    -- cannot hit?
-    | _, _ => panic! "Should not be able to get here"
 
 /--
 Turn
