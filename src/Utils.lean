@@ -16,6 +16,7 @@ partial def aocMain (mainFn : File -> IO Unit) (args : List String) : IO Unit :=
 
     else
       let fileContent <- IO.FS.readFile path
+      IO.println s!"Solution for {path}:"
       mainFn ⟨path, fileContent.trim⟩
 
 -- Parsing

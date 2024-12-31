@@ -58,6 +58,5 @@ def main := aocMain λ file => do
   | .error _ =>
     IO.eprintln s!"Failed to parse {file.path}"
   | .ok calibrations =>
-    IO.println  s!"Solution for {file.path}:"
     IO.println  s!"Part 1: { sumCalibrations calibrations calibrate1 }"
     IO.println  s!"Part 2: { sumCalibrations calibrations calibrate2 }"

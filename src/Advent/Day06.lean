@@ -166,8 +166,6 @@ def main := aocMain λ file => do
   | .none =>
     IO.eprintln s!"Failed to parse {file.path}"
   | .some roomState =>
-    IO.println s!"Solution for {file.path}:"
-
     if let .some visitedLocations := roomState.exitRoom then
       IO.println s!"Part 1: { visitedLocations.map (·.point) |>.size }"
       IO.println s!"Part 2: { countLoops roomState visitedLocations }"

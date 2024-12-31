@@ -56,6 +56,5 @@ def main := aocMain λ file => do
   | .error _ =>
     IO.eprintln s!"Failed to parse {file.path}"
   | .ok problemInput =>
-    IO.println s!"Solution for {file.path}:"
     IO.println s!"Part 1: {solve1 problemInput}"
     IO.println s!"Part 2: {solve2 problemInput}"

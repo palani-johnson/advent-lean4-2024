@@ -90,6 +90,5 @@ def main := aocMain λ file => do
 
   let size := { x := sizeX + 1, y := sizeY + 1 }
 
-  IO.println s!"Solution for {file.path} {sizeX} by {sizeY}:"
   IO.println s!"Part 1: {countAntinodesV1 antennaPoints size}"
   IO.println s!"Part 2: {countAntinodesV2 antennaPoints size}"

@@ -80,7 +80,6 @@ def main := aocMain λ file => do
 
     match parsedOrderingRules, parsedPageNumbers with
     | .ok orderingRules, .ok pageNumbers =>
-      IO.println s!"Solution for {file.path}:"
       IO.println s!"Part 1: {solve1 orderingRules pageNumbers}"
       IO.println s!"Part 2: {solve2 orderingRules pageNumbers}"
     | _, _ =>

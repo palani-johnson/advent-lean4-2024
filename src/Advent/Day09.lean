@@ -34,7 +34,7 @@ Turn
 into
   `00992111777.44.333....5555.6666.....8888..`
 -/
-def FileArray.condense (fileArray : FileArray) : FileArray := fileArra
+def FileArray.condense (fileArray : FileArray) : FileArray := fileArray
 
 partial def DiskArray.condense! (diskArray : DiskArray) (left right : Nat) : DiskArray :=
   if left >= right then
@@ -90,8 +90,6 @@ def FileArray.checksum (fileArray : FileArray) := fileArray.intoDiskArray.checks
 -- Main
 
 def main := aocMain λ file => do
-  IO.println s!"Solution for {file.path}:"
-
   let diskArray := DiskArray.fromString file.content
   IO.println s!"Part 1: {diskArray.condense.checksum}"
 

@@ -68,6 +68,5 @@ def solve2 (input : ProblemInput) :=
 def main := aocMain λ file => do
   let input := file.content |> splitInput
 
-  IO.println  s!"Solution for {file.path}:"
   IO.println s!"Part 1: {solve1 input}"
   IO.println s!"Part 2: {solve2 input}"
