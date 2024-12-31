@@ -8,6 +8,7 @@ inductive FileBlock where
   | file (id : Nat) (size : Nat)
 
 def FileArray := Array FileBlock
+deriving Inhabited
 
 inductive DiskBlock where
   | empty
@@ -28,13 +29,69 @@ def FileArray.fromString (string : String) : FileArray := string.trim.data.enum
   )
   |>.toArray
 
+def FileArray.mergeEmpty (fileArray : FileArray) : FileArray := fileArray.foldl (init := []) (λ
+    | acc,              .empty 0 => acc
+    | .empty a :: acc,  .empty b => .empty (a+b) :: acc
+    | acc,              item     => item :: acc
+  )
+  |>.reverse.toArray
+
+partial def FileArray.condense! (fileArray : FileArray) (id left right: Nat) : FileArray :=
+  if id < 0 then
+    fileArray
+  else if left >= right then
+    fileArray.condense! (id - 1) 0 (fileArray.size - 1)
+  else
+    let nextLeft  := left  + 1
+    let nextRight := right - 1
+
+    match fileArray.get? right with
+    | .some (.file fileId fileSize)  =>
+      -- keep searching for file
+      if id != fileId then
+        fileArray.condense! id left nextRight
+
+      -- found the file
+      else match fileArray.get? left with
+        | .some (.empty emptySize) =>
+          -- found suitable empty space
+          if emptySize >= fileSize then
+            -- let fileArray := fileArray.map (#[.])
+            --   |>.set! left #[.file fileId fileSize, .empty (emptySize - fileSize)]
+            --   |>.set! right #[.empty fileSize]
+            --   |>.flatten
+            --   |> FileArray.mergeEmpty
+
+            fileArray.condense! (id - 1) 0 (fileArray.size - 1)
+          else
+            fileArray.condense! id nextLeft right
+        | .some _ =>
+          -- keep searching for empty
+          fileArray.condense! id nextLeft right
+
+        -- cannot hit?
+        | _ => panic! "Should not be able to get here 2"
+
+    -- keep searching for file
+    | .some _ =>
+      fileArray.condense! id left nextRight
+
+    -- cannot hit?
+    | _ => panic! "Should not be able to get here"
+
 /--
 Turn
   `00...111...2...333.44.5555.6666.777.888899`
 into
   `00992111777.44.333....5555.6666.....8888..`
 -/
-def FileArray.condense (fileArray : FileArray) : FileArray := fileArray
+def FileArray.condense (fileArray : FileArray) : IO FileArray := do
+  let maxId := fileArray.foldl (init := 0) (λ
+    | m, .file id _ => max id m
+    | m, .empty _   => m
+  )
+
+  return fileArray.condense! maxId 0 (fileArray.size - 1)
 
 partial def DiskArray.condense! (diskArray : DiskArray) (left right : Nat) : DiskArray :=
   if left >= right then
@@ -94,4 +151,4 @@ def main := aocMain λ file => do
   IO.println s!"Part 1: {diskArray.condense.checksum}"
 
   let fileArray := FileArray.fromString file.content
-  IO.println s!"Part 1: {fileArray.checksum}"
+  IO.println s!"Part 1: {(<- fileArray.condense).checksum}"
