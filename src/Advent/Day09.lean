@@ -37,10 +37,12 @@ def FileArray.mergeEmpty (fileArray : FileArray) : FileArray := fileArray.foldl 
   |>.reverse.toArray
 
 partial def FileArray.condense! (fileArray : FileArray) (id left right: Nat) : FileArray :=
-  if id < 0 then
-    fileArray
-  else if left >= right then
-    fileArray.condense! (id - 1) 0 (fileArray.size - 1)
+  if left >= right then
+    let nextId := (id : Int) - 1
+    if nextId < 0 then
+      fileArray
+    else
+      fileArray.condense! nextId.toNat 0 (fileArray.size - 1)
   else
     let nextLeft  := left  + 1
     let nextRight := right - 1
@@ -56,11 +58,11 @@ partial def FileArray.condense! (fileArray : FileArray) (id left right: Nat) : F
         | .some (.empty emptySize) =>
           -- found suitable empty space
           if emptySize >= fileSize then
-            -- let fileArray := fileArray.map (#[.])
-            --   |>.set! left #[.file fileId fileSize, .empty (emptySize - fileSize)]
-            --   |>.set! right #[.empty fileSize]
-            --   |>.flatten
-            --   |> FileArray.mergeEmpty
+            let fileArray := fileArray.map (#[.])
+              |>.set! left #[.file fileId fileSize, .empty (emptySize - fileSize)]
+              |>.set! right #[.empty fileSize]
+              |>.flatten
+              |> FileArray.mergeEmpty
 
             fileArray.condense! (id - 1) 0 (fileArray.size - 1)
           else
@@ -85,13 +87,13 @@ Turn
 into
   `00992111777.44.333....5555.6666.....8888..`
 -/
-def FileArray.condense (fileArray : FileArray) : IO FileArray := do
+def FileArray.condense (fileArray : FileArray) : FileArray :=
   let maxId := fileArray.foldl (init := 0) (λ
     | m, .file id _ => max id m
     | m, .empty _   => m
   )
 
-  return fileArray.condense! maxId 0 (fileArray.size - 1)
+  fileArray.condense! maxId 0 (fileArray.size - 1)
 
 partial def DiskArray.condense! (diskArray : DiskArray) (left right : Nat) : DiskArray :=
   if left >= right then
@@ -151,4 +153,4 @@ def main := aocMain λ file => do
   IO.println s!"Part 1: {diskArray.condense.checksum}"
 
   let fileArray := FileArray.fromString file.content
-  IO.println s!"Part 1: {(<- fileArray.condense).checksum}"
+  IO.println s!"Part 1: {fileArray.condense.checksum}"
