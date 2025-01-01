@@ -1,7 +1,5 @@
 import Std
 
-def NotImplemented := "Not Implemented"
-
 structure File where
   path : System.FilePath
   content : String
