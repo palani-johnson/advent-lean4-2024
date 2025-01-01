@@ -3,15 +3,39 @@ import Utils
 
 -- Types
 
-inductive Direction where
-  | left
-  | right
-  | up
-  | down
+structure TrailMarker where
+  x : Nat
+  y : Nat
+deriving BEq, Hashable
 
-def ProblemInput := Std.HashMap Nat (Direction × Nat)
+def TopoMap := Std.HashMap TrailMarker (Std.HashMap Direction (TrailMarker × Nat))
+
+-- Functions
+
+--Parsing
+
+section
+  open Std.Internal.Parsec
+  open Std.Internal.Parsec.String
+
+  def TopoMap.parser : Parser TopoMap := do
+    let charToNat a := a.toNat - '0'.toNat
+    let digitParser := do
+      let a <- digit
+      return charToNat a
+
+    let grid <- sepBy (many digitParser) (skipChar '\n')
+
+    let grid : List (TrailMarker × Nat) := grid.enum
+      |>.map (λ (x, row) => row.toList.enum.map (λ (y, height) => (⟨x, y⟩, height)))
+      |>.flatten
+
+    return sorry
+end
+
+
 
 -- Main
 
 def main := aocMain λ file => do
-  let parseResult := file.content.splitOn "\n" |>.map (·.data.map (s!"{·}".toNat!))
+  let parseResult := TopoMap.parser.run file.content

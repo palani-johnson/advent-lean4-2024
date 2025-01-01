@@ -1,13 +1,6 @@
 import Std
 import Utils
 
--- Types
-
-structure Point where
-  x : Int
-  y : Int
-deriving BEq, Hashable
-
 -- Functions
 
 def getAntinode (p1 p2 : Point) : Point :=

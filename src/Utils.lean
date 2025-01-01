@@ -1,5 +1,7 @@
 import Std
 
+-- Main
+
 structure File where
   path : System.FilePath
   content : String
@@ -58,3 +60,23 @@ def Std.HashSet.map
     newHashSet := newHashSet.insert (f a)
 
   return newHashSet
+
+-- points
+
+structure Point where
+  x : Int
+  y : Int
+deriving BEq, Hashable
+
+inductive Direction where
+  | north
+  | south
+  | east
+  | west
+deriving BEq, Repr, Hashable
+
+def Point.nextPoint (point : Point) : Direction → Point
+| .north => { point with x := point.x - 1}
+| .south => { point with x := point.x + 1}
+| .east  => { point with y := point.y + 1}
+| .west  => { point with y := point.y - 1}

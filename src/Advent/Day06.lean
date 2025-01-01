@@ -9,18 +9,6 @@ inductive Tile where
   | exit
 deriving BEq
 
-inductive Direction where
-  | north
-  | south
-  | east
-  | west
-deriving BEq, Repr, Hashable
-
-structure Point where
-  x : Int
-  y : Int
-deriving BEq, Hashable
-
 structure LocationState where
   direction : Direction
   point : Point
@@ -57,12 +45,6 @@ instance : ToString Direction where
   | .south => "v"
   | .east  => ">"
   | .west  => "<"
-
-def Point.nextPoint (point : Point) : Direction → Point
-| .north => { point with x := point.x - 1}
-| .south => { point with x := point.x + 1}
-| .east  => { point with y := point.y + 1}
-| .west  => { point with y := point.y - 1}
 
 instance : ToString RoomState where
   toString r := r.room.enum
