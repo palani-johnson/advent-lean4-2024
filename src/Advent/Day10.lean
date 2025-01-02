@@ -55,10 +55,14 @@ def nextPoints (topoMap : TopoMap) (point : Point) : List Point :=
   else
     []
 
+partial def reachable (topoMap : TopoMap) (point : Point) : List Point :=
+  point :: (topoMap.nextPoints point |>.flatMap (topoMap.reachable ·))
+
+
 def dijkstra (topoMap : TopoMap) (point : Point) := Id.run do
   let mut dist : Std.HashMap Point Float := topoMap.map λ _ _ => Float.inf
   let mut prev : Std.HashMap Point (Option Point) := topoMap.map λ _ _ => .none
-  let mut queue := topoMap.keys
+  let mut queue := topoMap.reachable point
 
   dist := dist.insert point 0
 
