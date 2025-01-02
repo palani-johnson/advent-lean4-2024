@@ -47,7 +47,8 @@ def nextPoints (topoMap : TopoMap) (point : Point) : List Point :=
     Direction.all.flatMap ( λ direction =>
       let nextPoint := point.nextPoint direction
       if let .some nextHeight := topoMap.get? nextPoint then
-        if nextHeight == height + 1 then [nextPoint] else []
+        if nextHeight == height + 1 then [nextPoint]
+        else []
       else
         []
     )
@@ -90,15 +91,11 @@ def sumTrailScores (topoMap : TopoMap) : Nat :=
   )
   |>.sum
 
-partial def trailRatings (topoMap : TopoMap) (point : Point) := Id.run do
-  let mut acc := 0
-
-  for nextPoint in topoMap.nextPoints point do
-    let height := topoMap.get! nextPoint
-
-    acc := acc + if height == 9 then 1 else topoMap.trailRatings nextPoint
-
-  return acc
+partial def trailRatings (topoMap : TopoMap) (point : Point) : Nat := topoMap.nextPoints point
+  |>.foldl (init := 0) (λ acc nextPoint =>
+    acc + if topoMap.get! nextPoint == 9 then 1
+    else topoMap.trailRatings nextPoint
+  )
 
 def sumTrailRatings (topoMap : TopoMap) : Nat :=
   let sources := topoMap.filter (λ _ d => d == 0) |>.keys
