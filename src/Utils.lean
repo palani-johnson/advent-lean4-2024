@@ -61,7 +61,7 @@ def Std.HashSet.map
 
   return newHashSet
 
--- points
+-- Points
 
 structure Point where
   x : Int
@@ -80,3 +80,7 @@ def Point.nextPoint (point : Point) : Direction → Point
 | .south => { point with x := point.x + 1}
 | .east  => { point with y := point.y + 1}
 | .west  => { point with y := point.y - 1}
+
+def Direction.all : List Direction := [.north, .south, .east, .west]
+
+def Float.inf : Float := 1 / 0
