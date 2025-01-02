@@ -56,7 +56,7 @@ def nextPoints (topoMap : TopoMap) (point : Point) : List Point :=
     []
 
 partial def reachable (topoMap : TopoMap) (point : Point) : List Point :=
-  point :: (topoMap.nextPoints point |>.flatMap (topoMap.reachable ·))
+  point :: topoMap.nextPoints point |>.flatMap (topoMap.reachable ·)
 
 
 def dijkstra (topoMap : TopoMap) (point : Point) := Id.run do
