@@ -90,6 +90,22 @@ def sumTrailScores (topoMap : TopoMap) : Nat :=
   )
   |>.sum
 
+partial def trailRatings (topoMap : TopoMap) (point : Point) := Id.run do
+  let mut acc := 0
+
+  for nextPoint in topoMap.nextPoints point do
+    let height := topoMap.get! nextPoint
+
+    acc := acc + if height == 9 then 1 else topoMap.trailRatings nextPoint
+
+  return acc
+
+def sumTrailRatings (topoMap : TopoMap) : Nat :=
+  let sources := topoMap.filter (λ _ d => d == 0) |>.keys
+
+  sources.map (topoMap.trailRatings ·)
+  |>.sum
+
 end TopoMap
 
 -- Main
@@ -100,4 +116,4 @@ def main := aocMain λ file => do
     IO.eprintln s!"Failed to parse {file.path}"
   | .ok topoMap =>
     IO.println s!"Part 1: {topoMap.sumTrailScores}"
-    -- IO.println s!"Part 2: {}"
+    IO.println s!"Part 2: {topoMap.sumTrailRatings}"
