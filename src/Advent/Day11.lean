@@ -7,6 +7,8 @@ inductive BlinkCases
 | one (n : Nat)
 | two (n1 n2 : Nat)
 
+abbrev BlinkCache := Std.HashMap (Nat × Nat) Nat
+
 --Parsing
 
 section
@@ -18,14 +20,14 @@ end
 -- Functions
 
 partial def countDigits : Nat -> Nat
-| 0 => 0
-| n => 1 + countDigits (n / 10)
+  | 0 => 0
+  | n => 1 + countDigits (n / 10)
 
 def splitDigits (n splitAt : Nat) :=
   let d := 10 ^ splitAt
   (n / d, n % d)
 
-def blinkCases : Nat-> BlinkCases
+def blinkCases : Nat -> BlinkCases
   | 0 => .one 1
   | stone =>
     let digits := countDigits stone
@@ -34,8 +36,6 @@ def blinkCases : Nat-> BlinkCases
       .two s1 s2
     else
       .one (stone * 2024)
-
-abbrev BlinkCache := Std.HashMap (Nat × Nat) Nat
 
 partial def blinkMemoized (n count acc : Nat ) (cache : BlinkCache) : Nat × BlinkCache :=
   let key := (n, count)
