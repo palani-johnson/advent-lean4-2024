@@ -11,8 +11,11 @@ partial def aocMain (mainFn : File -> IO Unit) (args : List String) : IO Unit :=
     let path : System.FilePath := path
 
     if <- (path : System.FilePath).isDir then
-      for path in <- path.readDir do
-        aocMain mainFn [path.path.toString]
+      let paths <- path.readDir
+      let paths := paths.toList.map (·.path.toString)
+
+      for path in paths.mergeSort do
+        aocMain mainFn [path]
 
     else
       let fileContent <- IO.FS.readFile path
