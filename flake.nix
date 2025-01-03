@@ -15,7 +15,7 @@
       devShells.${system}.default = pkgs.mkShell {
         name = "advent-lean4-2024";
         buildInputs = with pkgs; [
-          lean4
+          elan
         ];
       };
 
