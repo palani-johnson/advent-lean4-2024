@@ -11,6 +11,6 @@ Solutions for indvidual days can be executed by running `lean exec` on a day  an
 The following will solve day 1 for all files found in `.data/day01`:
 
 ```shell
-lake exec day01 .data/day01
+lake exec day01 data/day01
 ```
 

@@ -1,6 +1,6 @@
 export def fetch-aoc-day [session_token : string, day : int] {
   let day_padded = $day | fill -a right -c '0' -w 2
-  let dir = $".data/day($day_padded)"
+  let dir = $"data/day($day_padded)"
 
   mkdir $dir
 
