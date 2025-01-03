@@ -2,7 +2,7 @@
   description = "Environment setup for AOC 2024 with Lean 4";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs";
   };
 
   outputs =
@@ -13,14 +13,11 @@
     in
     {
       devShells.${system}.default = pkgs.mkShell {
+        name = "advent-lean4-2024";
         buildInputs = with pkgs; [
-          hello
           lean4
         ];
       };
 
-      shellHook = ''
-        hello
-      '';
     };
 }
