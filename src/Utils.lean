@@ -35,6 +35,7 @@ section
     ) <|> pure []
 end
 
+-- 2D
 
 def get2D (input : List <| List α) (x y : Int) := do
   if x < 0 || y < 0 then Option.none
@@ -69,7 +70,7 @@ def Std.HashSet.map
 structure Point where
   x : Int
   y : Int
-deriving BEq, Hashable
+deriving BEq, Hashable, Repr, Inhabited
 
 inductive Direction where
   | north
@@ -86,4 +87,14 @@ def Point.nextPoint (point : Point) : Direction → Point
 
 def Direction.all : List Direction := [.north, .south, .east, .west]
 
+def Point.neighbors (point : Point) := Direction.all.map (point.nextPoint ·)
+
 def Float.inf : Float := 1 / 0
+
+-- Unique
+
+def List.unique [BEq α] (list : List α) := list.foldr (init := []) λ a acc =>
+  if acc.contains a then
+    acc
+  else
+    a :: acc
