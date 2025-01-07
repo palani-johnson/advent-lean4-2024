@@ -89,6 +89,13 @@ def Direction.all : List Direction := [.north, .south, .east, .west]
 
 def Point.neighbors (point : Point) := Direction.all.map (point.nextPoint ·)
 
+def Point.corners (point : Point) := [
+  point.nextPoint .north |>.nextPoint .west,
+  point.nextPoint .north |>.nextPoint .east,
+  point.nextPoint .south |>.nextPoint .west,
+  point.nextPoint .south |>.nextPoint .east,
+]
+
 def Float.inf : Float := 1 / 0
 
 -- Unique
