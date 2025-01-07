@@ -4,12 +4,12 @@ import Utils
 -- Types
 
 structure ClawMachine where
-  aX : Nat
-  aY : Nat
-  bX : Nat
-  bY : Nat
-  pX : Nat
-  pY : Nat
+  aX : Int
+  aY : Int
+  bX : Int
+  bY : Int
+  pX : Int
+  pY : Int
 
 --Parsing
 
@@ -40,38 +40,35 @@ end
 
 -- Functions
 
-def prizeLost (clawMechine : ClawMachine) (pX pY : Nat) :=
-  (pX > clawMechine.pX) || (pY > clawMechine.pY)
+/--
+Counts the number of button presses (A, B) required to reach the prize if the prize is reachable.
+-/
+def ClawMachine.solve (cm : ClawMachine) : Option (Int × Int)  :=
+  -- Use Cramer's rule to solve the system of equations
 
-def prizeAt (clawMechine : ClawMachine) (pX pY : Nat) :=
-  (pX == clawMechine.pX) && (pY == clawMechine.pY)
+  -- Calculate the determinant of the matrix
+  let d := cm.aX * cm.bY - cm.aY * cm.bX
 
-partial def minmax
-  (cm : ClawMachine)
-  (pX pY : Nat)
-  (spentCoins : Float)
-  : Float
-:=
-  if prizeLost cm pX pY || spentCoins > 305 then
-    Float.inf
+  -- Calculate dA and dB
+  let dA := cm.pX * cm.bY - cm.pY * cm.bX
+  let dB := cm.aX * cm.pY - cm.aY * cm.pX
 
-  else if prizeAt cm pX pY then
-    spentCoins
+  -- Calculate the solution
+  let A := dA / d
+  let B := dB / d
 
+  if
+    (A * cm.aX + B * cm.bX, A * cm.aY + B * cm.bY) == (cm.pX, cm.pY)
+  then
+    .some (A, B)
   else
-    let a := minmax cm (pX + cm.aX) (pY + cm.aY) (spentCoins + 3)
-    let b := minmax cm (pX + cm.bX) (pY + cm.bY) (spentCoins + 1)
+    .none
 
-    min a b
-
-def solve1 (clawMechines : List ClawMachine) :=
-  clawMechines.foldl (init := 0) λ acc cm =>
-    let mm := minmax cm 0 0 0
-    if mm == Float.inf then
-      acc
-    else
-      mm + acc
-
+/--
+Calculates the number of coins required to reach the prize if the prize is reachable.
+Returns 0 if the prize is unreachable.
+-/
+def ClawMachine.coins (cm : ClawMachine) : Int  := if let .some (A, B) := cm.solve then 3 * A + B else 0
 
 -- Main
 
@@ -81,5 +78,12 @@ def main := aocMain λ file => do
   match parseResult with
   | .error _ =>
     IO.eprintln s!"Failed to parse {file.path}"
-  | .ok problemInput =>
-    IO.println s!"Part 1: {solve1 problemInput}"
+  | .ok clawMechines =>
+    let solveCM (clawMechines : List ClawMachine) : Int := clawMechines.foldl (init := 0) (· + ·.coins)
+
+    IO.println s!"Part 1: {solveCM clawMechines}"
+
+    let clawMechines := clawMechines.map λ cm =>
+      { cm with pX := cm.pX + 10000000000000, pY := cm.pY + 10000000000000 }
+
+    IO.println s!"Part 2: {solveCM clawMechines}"
