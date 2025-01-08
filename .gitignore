@@ -3,3 +3,4 @@
 env.nu
 data/**/input.txt
 .direnv
+.out
